@@ -1,3 +1,5 @@
+--tables
+
 CREATE TABLE Users
 (
     UserId INT PRIMARY KEY,
@@ -36,3 +38,25 @@ CREATE TABLE MediaTypes
     MediaTypeId INT PRIMARY KEY,
     MediaTypeName TEXT
 )
+
+--procedures
+
+CREATE PROCEDURE InsertData @TableName TEXT, @Column1 TEXT, @Value1 TEXT
+AS
+INSERT INTO @TableName (@Column1)
+VALUES (@Value1)
+GO;
+
+CREATE PROCEDURE UpdateData @Param1 TEXT, @Condition1 INT
+AS
+UPDATE TableName
+SET Column1 = @Param1
+WHERE Condition1 = @Condition1
+GO;
+
+CREATE PROCEDURE RetrieveData @TableName TEXT, @Condition1 INT
+SELECT * FROM @TableName WHERE Condition1 = @Condition1
+GO;
+
+CREATE PROCEDURE DeleteData @TableName TEXT, @Condition1 INT
+DELETE FROM @TableName WHERE @Condition1;
