@@ -1,62 +1,76 @@
---tables
+---tables
 
-CREATE TABLE Users
+CREATE TABLE BorrowRecordTable
+(
+    BorrowRecordId INT PRIMARY KEY,
+    UserId INT FOREIGN KEY REFERENCES UsersTable(UserId),
+    MediaItemId INT FOREIGN KEY REFERENCES MediaItemTable(MediaItemId),
+    BorrowDate DATE,
+    ReturnDate DATE,
+)
+
+CREATE TABLE UsersTable
 (
     UserId INT PRIMARY KEY,
     UserName TEXT,
     UserEmail TEXT,
-    BorrowRecordId INT FOREIGN KEY REFERENCES BorrowRecords(BorrowRecordId)
 )
 
-CREATE TABLE BorrowRecords
+CREATE TABLE MediaItemTable
 (
-    BorrowRecordId INT PRIMARY KEY,
-    UserId INT FOREIGN KEY REFERENCES Users(UserId),
-    ItemId INT FOREIGN KEY REFERENCES Items(ItemId),
-    BorrowDate DATETIME,
-    ReturnDate DATETIME,
-    BorrowStatus TEXT
+    MediaItemId INT PRIMARY KEY,
+    MediaGenreId INT FOREIGN KEY REFERENCES MediaGenreTable(MediaGenreId),
+    MediaTypeId INT FOREIGN KEY REFERENCES MediaTypeTable(MediaTypeId),
+    MediaReleaseDate DATE,
+    MediaItemRating INT --triggered update?
 )
 
-CREATE TABLE Items
+CREATE TABLE MediaItemRatingTable
 (
-    ItemId INT PRIMARY KEY,
-    GenreId INT FOREIGN KEY REFERENCES Genres(GenreId),
-    MediaTypeId INT FOREIGN KEY REFERENCES MediaTypes(MediaTypeId),
-    ReleaseDate DATETIME,
-    Rating INT
+    MediaRatingId INT PRIMARY KEY,
+    ItemId INT FOREIGN KEY REFERENCES MediaItemTable(MediaItemId),
+    UserId INT FOREIGN KEY REFERENCES UsersTable(UserId),
+    MediaItemRating INT
 )
 
-CREATE TABLE Genres
+CREATE TABLE MediaGenreTable
 (
-    GenreId INT PRIMARY KEY,
-    GenreName TEXT
+    MediaGenreId INT PRIMARY KEY,
+    MediaGenreName TEXT
 )
 
-CREATE TABLE MediaTypes
+CREATE TABLE MediaTypeTable
 (
     MediaTypeId INT PRIMARY KEY,
     MediaTypeName TEXT
 )
 
---procedures
+---procedures
 
-CREATE PROCEDURE InsertData @TableName TEXT, @Column1 TEXT, @Value1 TEXT
+--borrowing proc
+CREATE PROCEDURE Borrowing @UserId INT, @MediaItem INT
 AS
-INSERT INTO @TableName (@Column1)
-VALUES (@Value1)
-GO;
+INSERT INTO BorrowRecordTable (UserId, MediaItemId, BorrowDate)
+VALUES (@UserId, @MediaItem, GETDATE())
 
-CREATE PROCEDURE UpdateData @Param1 TEXT, @Condition1 INT
+--returning proc
+CREATE PROCEDURE Returning @UserId INT, @MediaItemId INT
 AS
-UPDATE TableName
-SET Column1 = @Param1
-WHERE Condition1 = @Condition1
-GO;
+UPDATE BorrowRecordTable
+SET ReturnDate = GETDATE()
+WHERE UserId = @UserId AND MediaItemId = @MediaItemId
 
-CREATE PROCEDURE RetrieveData @TableName TEXT, @Condition1 INT
-SELECT * FROM @TableName WHERE Condition1 = @Condition1
-GO;
+--rating proc todo
+CREATE PROCEDURE Rating @UserId INT, @ItemId INT, @Rating INT
+AS
+INSERT INTO MediaItemRatingTable (UserId, MediaItemId, Rating)
+VALUES (@UserId, @MediaItem, @Rating)
 
-CREATE PROCEDURE DeleteData @TableName TEXT, @Condition1 INT
-DELETE FROM @TableName WHERE @Condition1;
+---views
+
+--view item avg rating todo
+-- view item's borrow history todo
+
+---triggers
+
+--update borrow status todo
